@@ -19,12 +19,18 @@ get_arch() {
   echo "$ARCH"
 }
 
+get_latest_version() {
+  # Get the latest version from GitHub API
+  curl -fsSL https://api.github.com/repos/asdf-vm/asdf/releases/latest | \
+    grep '"tag_name":' | \
+    sed -E 's/.*"tag_name": "([^"]+)".*/\1/'
+}
+
 check_version() {
   local VERSION="${1:-latest}"
   case "${VERSION}" in
     latest)
-      # TODO: we should resolve it instead of harcoding it
-      echo "v0.18.0"
+      get_latest_version
       ;;
     *)
       if [[ "$VERSION" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?(\+[a-zA-Z0-9.-]+)?$ ]]; then
@@ -52,20 +58,23 @@ check_alpine_packages() {
 
 install_asdf() {
 	local GIVEN_VERSION="${1:-latest}"
-  local ARCH="$(get_arch)"
-  local VERSION="$(check_version "${GIVEN_VERSION}")"
+  local ARCH
+  local VERSION
 
-  echo "+ installing asdf version=$VERSION arch=$ARCH"
-
-	# install git and curl if does not exists
+	# install needed deps
 	if cat /etc/os-release | grep "ID_LIKE=.*alpine.*\|ID=.*alpine.*" ; then
     check_alpine_packages git bash curl ca-certificates bash-completion
 	elif cat /etc/os-release | grep  "ID_LIKE=.*debian.*\|ID=.*debian.*"; then
 		check_packages git bash curl ca-certificates bash-completion
 	fi
 
-	# asdf may be installed somewhere on the machine, but we need it to be accessible to the remote user
-	# the code bellow will return 2 only when asdf is available, and 1 otherwise
+  ARCH="$(get_arch)"
+  VERSION="$(check_version "${GIVEN_VERSION}")"
+
+  echo "+ installing asdf version=$VERSION arch=$ARCH"
+
+	# check if asdf is installed and acessible for the remote user
+  # the code bellow will return 2 only when asdf is available, and 1 otherwise
 	set +e
 	su - "$_REMOTE_USER" <<EOF
 		if type asdf >/dev/null 2>&1; then
@@ -111,5 +120,5 @@ updaterc() {
 }
 
 # main
-echo "+ installing asdf"
-install_asdf $ASDF_VERSION
+echo "+ installing asdf (version ${ASDF_VERSION})"
+install_asdf $ASDF_VERSION || exit 1
