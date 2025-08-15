@@ -112,4 +112,4 @@ updaterc() {
 
 # main
 echo "+ installing asdf"
-install_asdf
+install_asdf $ASDF_VERSION

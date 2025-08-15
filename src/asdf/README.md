@@ -1,19 +1,24 @@
 
-# ASDF (after version 0.16.0)
+# asdf (asdf)
 
-A feature already exists for asdf but seems to not be working after 0.16.0 version of asdf
-So we created ours
+A feature to install asdf (after changes of 0.16.0 version)
 
 ## Example Usage
 
 ```json
 "features": {
-    "ghcr.io/hoverkraft-tech/devcontainer-asdf/asdf:1": {
-        "version": "latest"
-    }
+    "ghcr.io/hoverkraft-tech/devcontainers/asdf:1": {}
 }
 ```
 
 ## Options
 
-None
+| Options Id | Description | Type | Default Value |
+|-----|-----|-----|-----|
+| asdf_version | Version of asdf binary to install. | string | latest |
+
+
+
+---
+
+_Note: This file was auto-generated from the [devcontainer-feature.json](devcontainer-feature.json).  Add additional notes to a `NOTES.md`._

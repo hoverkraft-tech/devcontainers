@@ -12,5 +12,20 @@
             }
         },
         "remoteUser": "octocat"
+    },
+    "choose_asdf_version": {
+        "image": "mcr.microsoft.com/devcontainers/base:noble",
+        "features": {
+            "ghcr.io/devcontainers/features/common-utils:2.5": {
+                "installZsh": false,
+                "installOhMyZsh": false,
+                "upgradePackages": false,
+                "username": "octocat"
+            },
+            "asdf": {
+                "asdf_version": "v0.17.0"
+            }
+        },
+        "remoteUser": "octocat"
     }
 }

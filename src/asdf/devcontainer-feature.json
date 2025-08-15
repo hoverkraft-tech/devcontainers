@@ -4,6 +4,14 @@
     "version": "1.0.0",
     "description": "A feature to install asdf (after changes of 0.16.0 version)",
     "options": {
+        "asdf_version": {
+            "type": "string",
+            "proposals": [
+                "latest"
+            ],
+            "default": "latest",
+            "description": "Version of asdf binary to install."
+        }
     },
     "installsAfter": [
         "ghcr.io/devcontainers/features/common-utils:2"
