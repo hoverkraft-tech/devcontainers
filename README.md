@@ -1,60 +1,38 @@
-# Dev Container Features: Self Authoring Template
-
-> This repo provides a starting point and example for creating your own custom [dev container Features](https://containers.dev/implementors/features/), hosted for free on GitHub Container Registry.  The example in this repository follows the [dev container Feature distribution specification](https://containers.dev/implementors/features-distribution/).  
->
-> To provide feedback to the specification, please leave a comment [on spec issue #70](https://github.com/devcontainers/spec/issues/70). For more broad feedback regarding dev container Features, please see [spec issue #61](https://github.com/devcontainers/spec/issues/61).
+# Dev Container Features: hoverkraft-tech
 
 ## Example Contents
 
-This repository contains a _collection_ of two Features - `hello` and `color`. These Features serve as simple feature implementations.  Each sub-section below shows a sample `devcontainer.json` alongside example usage of the Feature.
+This repository contains a _collection_ devcontainer features.
+Each sub-section below shows a sample `devcontainer.json` alongside example usage of the Feature.
 
-### `hello`
+### `asdf`
 
-Running `hello` inside the built container will print the greeting provided to it via its `greeting` option.
+Install asdf (after v0.16.0 - the go rewrite) globally and configure it for each user.
 
 ```jsonc
 {
     "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
     "features": {
-        "ghcr.io/devcontainers/feature-starter/hello:1": {
-            "greeting": "Hello"
+        "ghcr.io/hoverkraft-tech/devcontainers/asdf:1": {
         }
     }
 }
 ```
 
 ```bash
-$ hello
+$ asdf plugin add kubectl
+$ asdf install kubectl latest
+$ kubectl version --client
 
-Hello, user.
-```
-
-### `color`
-
-Running `color` inside the built container will print your favorite color to standard out.
-
-```jsonc
-{
-    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
-    "features": {
-        "ghcr.io/devcontainers/feature-starter/color:1": {
-            "favorite": "green"
-        }
-    }
-}
-```
-
-```bash
-$ color
-
-my favorite color is green
+Client Version: v1.33.4
+Kustomize Version: v5.6.0
 ```
 
 ## Repo and Feature Structure
 
-Similar to the [`devcontainers/features`](https://github.com/devcontainers/features) repo, this repository has a `src` folder.  Each Feature has its own sub-folder, containing at least a `devcontainer-feature.json` and an entrypoint script `install.sh`. 
+Similar to the [`devcontainers/features`](https://github.com/devcontainers/features) repo, this repository has a `src` folder.  Each Feature has its own sub-folder, containing at least a `devcontainer-feature.json` and an entrypoint script `install.sh`.
 
-```
+```none
 ├── src
 │   ├── hello
 │   │   ├── devcontainer-feature.json
@@ -113,19 +91,19 @@ Features are individually versioned by the `version` attribute in a Feature's `d
 
 ### Publishing
 
-> NOTE: The Distribution spec can be [found here](https://containers.dev/implementors/features-distribution/).  
+> NOTE: The Distribution spec can be [found here](https://containers.dev/implementors/features-distribution/).
 >
 > While any registry [implementing the OCI Distribution spec](https://github.com/opencontainers/distribution-spec) can be used, this template will leverage GHCR (GitHub Container Registry) as the backing registry.
 
-Features are meant to be easily sharable units of dev container configuration and installation code.  
+Features are meant to be easily sharable units of dev container configuration and installation code.
 
-This repo contains a **GitHub Action** [workflow](.github/workflows/release.yaml) that will publish each Feature to GHCR. 
+This repo contains a **GitHub Action** [workflow](.github/workflows/release.yaml) that will publish each Feature to GHCR.
 
-*Allow GitHub Actions to create and approve pull requests* should be enabled in the repository's `Settings > Actions > General > Workflow permissions` for auto generation of `src/<feature>/README.md` per Feature (which merges any existing `src/<feature>/NOTES.md`).
+_Allow GitHub Actions to create and approve pull requests_ should be enabled in the repository's `Settings > Actions > General > Workflow permissions` for auto generation of `src/<feature>/README.md` per Feature (which merges any existing `src/<feature>/NOTES.md`).
 
 By default, each Feature will be prefixed with the `<owner/<repo>` namespace.  For example, the two Features in this repository can be referenced in a `devcontainer.json` with:
 
-```
+```none
 ghcr.io/devcontainers/feature-starter/color:1
 ghcr.io/devcontainers/feature-starter/hello:1
 ```
@@ -140,7 +118,7 @@ Note that by default, GHCR packages are marked as `private`.  To stay within the
 
 This can be done by navigating to the Feature's "package settings" page in GHCR, and setting the visibility to 'public`.  The URL may look something like:
 
-```
+```none
 https://github.com/users/<owner>/packages/container/<repo>%2F<featureName>/settings
 ```
 
@@ -150,9 +128,9 @@ https://github.com/users/<owner>/packages/container/<repo>%2F<featureName>/setti
 
 If you'd like your Features to appear in our [public index](https://containers.dev/features) so that other community members can find them, you can do the following:
 
-* Go to [github.com/devcontainers/devcontainers.github.io](https://github.com/devcontainers/devcontainers.github.io)
-     * This is the GitHub repo backing the [containers.dev](https://containers.dev/) spec site
-* Open a PR to modify the [collection-index.yml](https://github.com/devcontainers/devcontainers.github.io/blob/gh-pages/_data/collection-index.yml) file
+- Go to [github.com/devcontainers/devcontainers.github.io](https://github.com/devcontainers/devcontainers.github.io)
+  - This is the GitHub repo backing the [containers.dev](https://containers.dev/) spec site
+- Open a PR to modify the [collection-index.yml](https://github.com/devcontainers/devcontainers.github.io/blob/gh-pages/_data/collection-index.yml) file
 
 This index is from where [supporting tools](https://containers.dev/supporting) like [VS Code Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) and [GitHub Codespaces](https://github.com/features/codespaces) surface Features for their dev container creation UI.
 
