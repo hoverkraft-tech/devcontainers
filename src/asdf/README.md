@@ -1,8 +1,6 @@
 
 # asdf (asdf)
 
-[![CI - Test Features](https://github.com/hoverkraft-tech/devcontainers/actions/workflows/test.yaml/badge.svg)](https://github.com/hoverkraft-tech/devcontainers/actions/workflows/test.yaml)
-
 A feature to install asdf (after changes of 0.16.0 version)
 
 ## Example Usage
@@ -23,4 +21,4 @@ A feature to install asdf (after changes of 0.16.0 version)
 
 ---
 
-_Note: This file was auto-generated from the [devcontainer-feature.json](devcontainer-feature.json).  Add additional notes to a `NOTES.md`._
+_Note: This file was auto-generated from the [devcontainer-feature.json](https://github.com/hoverkraft-tech/devcontainers/blob/main/src/asdf/devcontainer-feature.json).  Add additional notes to a `NOTES.md`._
