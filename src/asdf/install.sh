@@ -20,10 +20,17 @@ get_arch() {
 }
 
 get_latest_version() {
-  # Get the latest version from GitHub API
-  curl -fsSL https://api.github.com/repos/asdf-vm/asdf/releases/latest | \
-    grep '"tag_name":' | \
-    sed -E 's/.*"tag_name": "([^"]+)".*/\1/'
+  # Resolve GitHub's public release redirect without consuming anonymous API quota.
+  local release_url
+  release_url="$(curl --fail --silent --show-error --location --head \
+    --output /dev/null --write-out '%{url_effective}' \
+    https://github.com/asdf-vm/asdf/releases/latest)" || return 1
+  local version="${release_url##*/}"
+  if [[ ! "$version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "Could not resolve a stable asdf release" >&2
+    return 1
+  fi
+  printf '%s\n' "$version"
 }
 
 check_version() {
@@ -69,7 +76,7 @@ install_asdf() {
 	fi
 
   ARCH="$(get_arch)"
-  VERSION="$(check_version "${GIVEN_VERSION}")"
+  VERSION="$(check_version "${GIVEN_VERSION}")" || return 1
 
   echo "+ installing asdf version=$VERSION arch=$ARCH"
 
@@ -94,7 +101,7 @@ EOF
       curl -fL -o asdf-${VERSION}-linux-${ARCH}.tar.gz https://github.com/asdf-vm/asdf/releases/download/${VERSION}/asdf-${VERSION}-linux-${ARCH}.tar.gz && \
       tar -zxvf asdf-${VERSION}-linux-${ARCH}.tar.gz && \
       rm -rf asdf-${VERSION}-linux-${ARCH}.tar.gz && \
-      mv asdf /usr/local/bin/
+      mv asdf /usr/local/bin/ || return 1
 
     # update shell configs
     updaterc '\n# asdf setup (do not edit)'
