@@ -17,7 +17,7 @@ The default `asdf_version` is `latest`. To select an asdf release explicitly:
 }
 ```
 
-See the [generated feature reference](../../src/asdf/README.md) for options.
+See the [generated feature reference](README.md) for options.
 The tag after `asdf:` selects the feature version; `asdf_version` selects the
 installed asdf binary.
 

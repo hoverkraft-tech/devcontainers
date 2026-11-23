@@ -1,6 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0.6127 1.4995 66.6550 66.6550" role="img" aria-labelledby="logo-title">
   <title id="logo-title">Dev Container features logo</title>
+  <!-- Shared geometry from social-preview.svg. -->
+  <!-- jscpd:ignore-start -->
   <g style="clip-rule:evenodd;fill-rule:evenodd;image-rendering:optimizeQuality;shape-rendering:geometricPrecision;text-rendering:geometricPrecision" transform="translate(.332 -.144)scale(.26458)" id="g2">
     <rect width="241.368" height="247.861" x="6.339" y="8.104" ry="17.481" style="fill:#1998ff;fill-opacity:1;stroke-width:10.5638;stroke-linecap:round;stroke-linejoin:bevel;stroke-dasharray:none;paint-order:markers fill stroke" id="rect1" />
     <rect width="241.38" height="41.469" x="6.364" y="214.779" ry="17.481" style="clip-rule:evenodd;fill:#506690;fill-opacity:1;fill-rule:evenodd;stroke-width:10.5641;stroke-linecap:round;stroke-linejoin:bevel;stroke-dasharray:none;paint-order:markers fill stroke;image-rendering:optimizeQuality;shape-rendering:geometricPrecision;text-rendering:geometricPrecision" id="rect2" />
@@ -10,4 +12,5 @@
     <path d="M22 2 42 12.5V33.5L22 44 2 33.5V12.5Z M2 12.5 22 22 42 12.5 M22 22V44 M12 7.25 32 17.25" id="path4" />
     <path d="m7 21 3.75 4.5L7 27 m7 3 3 1.5" id="path5" />
   </g>
+  <!-- jscpd:ignore-end -->
 </svg>
