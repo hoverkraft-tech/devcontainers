@@ -1,4 +1,5 @@
-name: Prepare release
+---
+name: Internal - Prepare release
 
 on:
   pull_request:
