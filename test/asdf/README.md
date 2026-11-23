@@ -1,7 +1,5 @@
-# Tests
+# asdf tests
 
-Read: <https://github.com/devcontainers/cli/blob/main/docs/features/test.md>
-
-- setting a test.sh is a way to override the auto-generated test
-- if scenarios.json exists this adds to auto-generated test
-- each entry in scenarios.json must have a script of the same name
+Assertions for the default installation, version selection, and installing
+kubectl as a non-root user. See the [development guide](../../docs/development/ci.md)
+for local commands and the CI matrix.

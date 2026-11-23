@@ -1,0 +1,4 @@
+node_modules/
+.cache/
+super-linter-output/
+super-linter.log

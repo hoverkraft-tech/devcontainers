@@ -2,55 +2,55 @@
 set -e
 set -x
 
-
 get_arch() {
-  case "$(uname -m)" in
-    x86_64)
-      ARCH="amd64"
-      ;;
-    aarch64|arm64)
-      ARCH="arm64"
-      ;;
-    *)
-      echo "Unsupported architecture: $(uname -m)" >/dev/stderr
-      exit 1
-      ;;
-  esac
-  echo "$ARCH"
+	case "$(uname -m)" in
+	x86_64)
+		ARCH="amd64"
+		;;
+	aarch64 | arm64)
+		ARCH="arm64"
+		;;
+	*)
+		echo "Unsupported architecture: $(uname -m)" >/dev/stderr
+		exit 1
+		;;
+	esac
+	echo "$ARCH"
 }
 
 get_latest_version() {
-  # Resolve GitHub's public release redirect without consuming anonymous API quota.
-  local release_url
-  release_url="$(curl --fail --silent --show-error --location --head \
-    --output /dev/null --write-out '%{url_effective}' \
-    https://github.com/asdf-vm/asdf/releases/latest)" || return 1
-  local version="${release_url##*/}"
-  if [[ ! "$version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    echo "Could not resolve a stable asdf release" >&2
-    return 1
-  fi
-  printf '%s\n' "$version"
+	# Resolve GitHub's public release redirect without consuming anonymous API quota.
+	local release_url
+	release_url="$(curl --fail --silent --show-error --location --head \
+		--output /dev/null --write-out '%{url_effective}' \
+		https://github.com/asdf-vm/asdf/releases/latest)" || return 1
+	local version="${release_url##*/}"
+	if [[ ! "$version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+		echo "Could not resolve a stable asdf release" >&2
+		return 1
+	fi
+	printf '%s\n' "$version"
 }
 
 check_version() {
-  local VERSION="${1:-latest}"
-  case "${VERSION}" in
-    latest)
-      get_latest_version
-      ;;
-    *)
-      if [[ "$VERSION" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?(\+[a-zA-Z0-9.-]+)?$ ]]; then
-        echo "$VERSION"
-      else
-        echo "Invalid semver format: $VERSION" >/dev/stderr
-        exit 1
-      fi
-  esac
+	local VERSION="${1:-latest}"
+	case "${VERSION}" in
+	latest)
+		get_latest_version
+		;;
+	*)
+		if [[ "$VERSION" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?(\+[a-zA-Z0-9.-]+)?$ ]]; then
+			echo "$VERSION"
+		else
+			echo "Invalid semver format: $VERSION" >/dev/stderr
+			exit 1
+		fi
+		;;
+	esac
 }
 
 check_packages() {
-  if ! dpkg -s "$@" >/dev/null 2>&1; then
+	if ! dpkg -s "$@" >/dev/null 2>&1; then
 		if [ "$(find /var/lib/apt/lists/* | wc -l)" = "0" ]; then
 			echo "Running apt-get update..."
 			apt-get update -y
@@ -60,28 +60,28 @@ check_packages() {
 }
 
 check_alpine_packages() {
-    apk add -v --no-cache "$@"
+	apk add -v --no-cache "$@"
 }
 
 install_asdf() {
 	local GIVEN_VERSION="${1:-latest}"
-  local ARCH
-  local VERSION
+	local ARCH
+	local VERSION
 
 	# install needed deps
-	if cat /etc/os-release | grep "ID_LIKE=.*alpine.*\|ID=.*alpine.*" ; then
-    check_alpine_packages git bash curl ca-certificates bash-completion
-	elif cat /etc/os-release | grep  "ID_LIKE=.*debian.*\|ID=.*debian.*"; then
+	if cat /etc/os-release | grep "ID_LIKE=.*alpine.*\|ID=.*alpine.*"; then
+		check_alpine_packages git bash curl ca-certificates bash-completion
+	elif cat /etc/os-release | grep "ID_LIKE=.*debian.*\|ID=.*debian.*"; then
 		check_packages git bash curl ca-certificates bash-completion
 	fi
 
-  ARCH="$(get_arch)"
-  VERSION="$(check_version "${GIVEN_VERSION}")" || return 1
+	ARCH="$(get_arch)"
+	VERSION="$(check_version "${GIVEN_VERSION}")" || return 1
 
-  echo "+ installing asdf version=$VERSION arch=$ARCH"
+	echo "+ installing asdf version=$VERSION arch=$ARCH"
 
-	# check if asdf is installed and acessible for the remote user
-  # the code bellow will return 2 only when asdf is available, and 1 otherwise
+	# check if asdf is installed and accessible for the remote user
+	# the code below will return 2 only when asdf is available, and 1 otherwise
 	set +e
 	su - "$_REMOTE_USER" <<EOF
 		if type asdf >/dev/null 2>&1; then
@@ -96,23 +96,23 @@ EOF
 		echo "asdf already available to remote user, skip this step"
 	else
 		# asdf is not available install it
-    echo "+ installing asdf binary"
-    cd /tmp && \
-      curl -fL -o asdf-${VERSION}-linux-${ARCH}.tar.gz https://github.com/asdf-vm/asdf/releases/download/${VERSION}/asdf-${VERSION}-linux-${ARCH}.tar.gz && \
-      tar -zxvf asdf-${VERSION}-linux-${ARCH}.tar.gz && \
-      rm -rf asdf-${VERSION}-linux-${ARCH}.tar.gz && \
-      mv asdf /usr/local/bin/ || return 1
+		echo "+ installing asdf binary"
+		cd /tmp &&
+			curl -fL -o "asdf-${VERSION}-linux-${ARCH}.tar.gz" "https://github.com/asdf-vm/asdf/releases/download/${VERSION}/asdf-${VERSION}-linux-${ARCH}.tar.gz" &&
+			tar -zxvf "asdf-${VERSION}-linux-${ARCH}.tar.gz" &&
+			rm -rf "asdf-${VERSION}-linux-${ARCH}.tar.gz" &&
+			mv asdf /usr/local/bin/ || return 1
 
-    # update shell configs
-    updaterc '\n# asdf setup (do not edit)'
-    # shellcheck disable=SC2016
-    updaterc 'export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"'
-    updaterc '. <(asdf completion bash)'
+		# update shell configs
+		updaterc '\n# asdf setup (do not edit)'
+		# shellcheck disable=SC2016
+		updaterc 'export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"'
+		updaterc '. <(asdf completion bash)'
 	fi
 }
 
 updaterc() {
-	if cat /etc/os-release | grep "ID_LIKE=.*alpine.*\|ID=.*alpine.*" ; then
+	if cat /etc/os-release | grep "ID_LIKE=.*alpine.*\|ID=.*alpine.*"; then
 		echo "Updating /etc/profile"
 		echo -e "$1" >>/etc/profile
 	fi
@@ -128,4 +128,4 @@ updaterc() {
 
 # main
 echo "+ installing asdf (version ${ASDF_VERSION})"
-install_asdf $ASDF_VERSION || exit 1
+install_asdf "$ASDF_VERSION" || exit 1
