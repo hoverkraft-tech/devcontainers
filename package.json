@@ -2,7 +2,7 @@
 	"name": "@hoverkraft-tech/devcontainers",
 	"private": true,
 	"scripts": {
-		"test": "node --test .github/scripts/*.test.mjs"
+		"docs:check": "make check-docs"
 	},
 	"engines": {
 		"node": ">=24"
