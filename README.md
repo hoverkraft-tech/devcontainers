@@ -16,10 +16,11 @@ Install asdf (after v0.16.0 - the go rewrite) globally and configure it for each
 
 ```jsonc
 {
-  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
-  "features": {
-    "ghcr.io/hoverkraft-tech/devcontainers/asdf:1": {},
-  },
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+        "ghcr.io/hoverkraft-tech/devcontainers/asdf:1": {
+        }
+    }
 }
 ```
 
@@ -34,7 +35,7 @@ Kustomize Version: v5.6.0
 
 ## Repo and Feature Structure
 
-Similar to the [`devcontainers/features`](https://github.com/devcontainers/features) repo, this repository has a `src` folder. Each Feature has its own sub-folder, containing at least a `devcontainer-feature.json` and an entrypoint script `install.sh`.
+Similar to the [`devcontainers/features`](https://github.com/devcontainers/features) repo, this repository has a `src` folder.  Each Feature has its own sub-folder, containing at least a `devcontainer-feature.json` and an entrypoint script `install.sh`.
 
 ```none
 ├── src
@@ -50,29 +51,33 @@ Similar to the [`devcontainers/features`](https://github.com/devcontainers/featu
 ...
 ```
 
-An [implementing tool](https://containers.dev/supporting#tools) will composite [the documented dev container properties](https://containers.dev/implementors/features/#devcontainer-feature-json-properties) from the feature's `devcontainer-feature.json` file, and execute in the `install.sh` entrypoint script in the container during build time. Implementing tools are also free to process attributes under the `customizations` property as desired.
+An [implementing tool](https://containers.dev/supporting#tools) will composite [the documented dev container properties](https://containers.dev/implementors/features/#devcontainer-feature-json-properties) from the feature's `devcontainer-feature.json` file, and execute in the `install.sh` entrypoint script in the container during build time.  Implementing tools are also free to process attributes under the `customizations` property as desired.
 
 ### Options
 
-All available options for a Feature should be declared in the `devcontainer-feature.json`. The syntax for the `options` property can be found in the [devcontainer Feature json properties reference](https://containers.dev/implementors/features/#devcontainer-feature-json-properties).
+All available options for a Feature should be declared in the `devcontainer-feature.json`.  The syntax for the `options` property can be found in the [devcontainer Feature json properties reference](https://containers.dev/implementors/features/#devcontainer-feature-json-properties).
 
-For example, the `color` feature provides an enum of three possible options (`red`, `gold`, `green`). If no option is provided in a user's `devcontainer.json`, the value is set to "red".
+For example, the `color` feature provides an enum of three possible options (`red`, `gold`, `green`).  If no option is provided in a user's `devcontainer.json`, the value is set to "red".
 
 ```jsonc
 {
-  // ...
-  "options": {
-    "favorite": {
-      "type": "string",
-      "enum": ["red", "gold", "green"],
-      "default": "red",
-      "description": "Choose your favorite color.",
-    },
-  },
+    // ...
+    "options": {
+        "favorite": {
+            "type": "string",
+            "enum": [
+                "red",
+                "gold",
+                "green"
+            ],
+            "default": "red",
+            "description": "Choose your favorite color."
+        }
+    }
 }
 ```
 
-Options are exported as Feature-scoped environment variables. The option name is captialized and sanitized according to [option resolution](https://containers.dev/implementors/features/#option-resolution).
+Options are exported as Feature-scoped environment variables.  The option name is captialized and sanitized according to [option resolution](https://containers.dev/implementors/features/#option-resolution).
 
 ```bash
 #!/bin/bash
@@ -87,7 +92,7 @@ echo "The provided favorite color is: ${FAVORITE}"
 
 ### Versioning
 
-Features are individually versioned by the `version` attribute in a Feature's `devcontainer-feature.json`. Features are versioned according to the semver specification. More details can be found in [the dev container Feature specification](https://containers.dev/implementors/features/#versioning).
+Features are individually versioned by the `version` attribute in a Feature's `devcontainer-feature.json`.  Features are versioned according to the semver specification. More details can be found in [the dev container Feature specification](https://containers.dev/implementors/features/#versioning).
 
 ### Publishing
 
@@ -101,22 +106,22 @@ This repo contains a **GitHub Action** [workflow](.github/workflows/release.yaml
 
 _Allow GitHub Actions to create and approve pull requests_ should be enabled in the repository's `Settings > Actions > General > Workflow permissions` for auto generation of `src/<feature>/README.md` per Feature (which merges any existing `src/<feature>/NOTES.md`).
 
-By default, each Feature will be prefixed with the `<owner/<repo>` namespace. For example, the two Features in this repository can be referenced in a `devcontainer.json` with:
+By default, each Feature will be prefixed with the `<owner/<repo>` namespace.  For example, the two Features in this repository can be referenced in a `devcontainer.json` with:
 
 ```none
 ghcr.io/devcontainers/feature-starter/color:1
 ghcr.io/devcontainers/feature-starter/hello:1
 ```
 
-The provided GitHub Action will also publish a third "metadata" package with just the namespace, eg: `ghcr.io/devcontainers/feature-starter`. This contains information useful for tools aiding in Feature discovery.
+The provided GitHub Action will also publish a third "metadata" package with just the namespace, eg: `ghcr.io/devcontainers/feature-starter`.  This contains information useful for tools aiding in Feature discovery.
 
 '`devcontainers/feature-starter`' is known as the feature collection namespace.
 
 ### Marking Feature Public
 
-Note that by default, GHCR packages are marked as `private`. To stay within the free tier, Features need to be marked as `public`.
+Note that by default, GHCR packages are marked as `private`.  To stay within the free tier, Features need to be marked as `public`.
 
-This can be done by navigating to the Feature's "package settings" page in GHCR, and setting the visibility to 'public`. The URL may look something like:
+This can be done by navigating to the Feature's "package settings" page in GHCR, and setting the visibility to 'public`.  The URL may look something like:
 
 ```none
 https://github.com/users/<owner>/packages/container/<repo>%2F<featureName>/settings
@@ -138,29 +143,29 @@ This index is from where [supporting tools](https://containers.dev/supporting) l
 
 For any Features hosted in GHCR that are kept private, the `GITHUB_TOKEN` access token in your environment will need to have `package:read` and `contents:read` for the associated repository.
 
-Many implementing tools use a broadly scoped access token and will work automatically. GitHub Codespaces uses repo-scoped tokens, and therefore you'll need to add the permissions in `devcontainer.json`
+Many implementing tools use a broadly scoped access token and will work automatically.  GitHub Codespaces uses repo-scoped tokens, and therefore you'll need to add the permissions in `devcontainer.json`
 
 An example `devcontainer.json` can be found below.
 
 ```jsonc
 {
-  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
-  "features": {
-    "ghcr.io/my-org/private-features/hello:1": {
-      "greeting": "Hello",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+     "ghcr.io/my-org/private-features/hello:1": {
+            "greeting": "Hello"
+        }
     },
-  },
-  "customizations": {
-    "codespaces": {
-      "repositories": {
-        "my-org/private-features": {
-          "permissions": {
-            "packages": "read",
-            "contents": "read",
-          },
-        },
-      },
-    },
-  },
+    "customizations": {
+        "codespaces": {
+            "repositories": {
+                "my-org/private-features": {
+                    "permissions": {
+                        "packages": "read",
+                        "contents": "read"
+                    }
+                }
+            }
+        }
+    }
 }
 ```
