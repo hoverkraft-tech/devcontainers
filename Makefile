@@ -1,11 +1,18 @@
 LINTER_IMAGE := ghcr.io/hoverkraft-tech/docker-base-images/super-linter:2.0.2@sha256:12dedee667b43856a9cc792628fecc4723fc0868bf8090d268981407a7402b2c
 
-.PHONY: docs lint test
+.PHONY: docs check-docs lint test
 
 docs:
 	npx --no-install devcontainer features generate-docs --project-folder ./src \
 		--namespace hoverkraft-tech/devcontainers --github-owner hoverkraft-tech --github-repo devcontainers
 	node .github/scripts/format-feature-docs.mjs
+
+check-docs: docs
+	@if [ -n "$$(git status --porcelain -- 'src/*/README.md')" ]; then \
+		echo 'Run make docs and commit the generated feature documentation.' >&2; \
+		git diff -- 'src/*/README.md'; \
+		exit 1; \
+	fi
 
 lint:
 	docker run --rm \
@@ -18,7 +25,6 @@ lint:
 		$(LINTER_IMAGE)
 
 test:
-	npm test
 	@set -eu; \
 	for image in debian:latest ubuntu:latest mcr.microsoft.com/devcontainers/base:ubuntu; do \
 		npx --no-install devcontainer features test --skip-scenarios -f asdf -i "$$image" --project-folder .; \

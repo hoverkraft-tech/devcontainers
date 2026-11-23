@@ -46,7 +46,7 @@ asdf set kubectl latest
 kubectl version --client
 ```
 
-See the [asdf usage guide](src/asdf/USAGE.md) for version selection and private
+See the [asdf usage guide](src/asdf/README.md#using-the-asdf-feature) for version selection and private
 registry access, and the [documentation index](docs/README.md) for all guides.
 
 ## Contributing

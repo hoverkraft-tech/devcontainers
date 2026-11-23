@@ -13,57 +13,57 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  plan:
+  plan-release:
     if: github.ref_type == 'branch' && github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
       contents: read
+      pull-requests: read
     outputs:
       should-release: ${{ steps.plan.outputs.should-release }}
+      tag: ${{ steps.plan.outputs.tag }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
       - id: plan
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        uses: hoverkraft-tech/ci-github-publish/actions/release/plan@79515002f850e714d4c76f07983e6eb1ba97bea5 # 3.1.1
         with:
-          script: |
-            const { readdir, readFile } = require('node:fs/promises');
-            const { join } = require('node:path');
-            const root = process.env.GITHUB_WORKSPACE;
-            const { FeatureReleasePlanner } = await import(
-              join(root, '.github/scripts/feature-release-planner.mjs')
-            );
-            const entries = await readdir(join(root, 'src'), { withFileTypes: true });
-            const features = await Promise.all(entries.filter(entry => entry.isDirectory()).map(
-              async entry => JSON.parse(await readFile(
-                join(root, 'src', entry.name, 'devcontainer-feature.json'), 'utf8'
-              ))
-            ));
-            const planner = new FeatureReleasePlanner(github, context.repo);
-            const releases = await planner.plan(features);
-            core.setOutput('should-release', releases.length > 0);
-            core.info(releases.length
-              ? `Unpublished feature versions: ${releases.map(release => release.tag).join(', ')}`
-              : 'All declared feature versions have already been published.');
+          target-ref: ${{ github.sha }}
+          github-token: ${{ github.token }}
 
   ci:
-    needs: plan
-    if: needs.plan.outputs.should-release == 'true'
+    needs: plan-release
+    if: needs.plan-release.outputs.should-release == 'true'
     uses: $/.github/workflows/__shared-ci.yml
     permissions:
       actions: read
       contents: read
+      id-token: write
       issues: write
       packages: read
       pull-requests: write
       security-events: write
       statuses: write
 
-  deploy:
-    needs: ci
+  draft-release:
+    needs: [plan-release, ci]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: read
+    outputs:
+      tag: ${{ steps.release.outputs.tag }}
+    steps:
+      - id: release
+        uses: hoverkraft-tech/ci-github-publish/actions/release/create@79515002f850e714d4c76f07983e6eb1ba97bea5 # 3.1.1
+        with:
+          tag: ${{ needs.plan-release.outputs.tag }}
+          target-ref: ${{ github.sha }}
+          publish: "false"
+          github-token: ${{ github.token }}
+
+  publish-features:
+    needs: draft-release
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -72,9 +72,8 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.sha }}
           persist-credentials: false
-
-      - uses: hoverkraft-tech/ci-github-nodejs/actions/setup-node@98d91b1cc347efc64cd5fb20bc0ebc076acad114 # 3.1.0
 
       - name: "Publish Features"
         uses: devcontainers/action@bef2cf2d1a019b00b45e184f83035e01bd1972f3 # v1.4.4
@@ -84,23 +83,29 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
-      - name: Generate feature documentation
-        run: make docs
-
-      - id: generate-token
-        uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
+  cleanup-draft-release:
+    needs: [draft-release, publish-features]
+    if: ${{ failure() && needs.draft-release.result == 'success' && needs.publish-features.result == 'failure' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: hoverkraft-tech/ci-github-publish/actions/release/delete@79515002f850e714d4c76f07983e6eb1ba97bea5 # 3.1.1
         with:
-          client-id: ${{ vars.CI_BOT_APP_CLIENT_ID }}
-          private-key: ${{ secrets.CI_BOT_APP_PRIVATE_KEY }} # zizmor: ignore[secrets-outside-env] documentation updates use the CI bot
-          permission-contents: write
-          permission-pull-requests: write
+          tag: ${{ needs.draft-release.outputs.tag }}
+          draft-only: "true"
+          github-token: ${{ github.token }}
 
-      - name: Update feature documentation
-        uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@33462c06bcbbd9144d7f661929e61953604b444d # 4.3.2
+  publish-release:
+    needs: [draft-release, publish-features]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: hoverkraft-tech/ci-github-publish/actions/release/update@79515002f850e714d4c76f07983e6eb1ba97bea5 # 3.1.1
         with:
-          github-token: ${{ steps.generate-token.outputs.token }}
-          branch: docs/devcontainer-features
-          title: "docs: update feature documentation"
-          body: Update generated dev container feature documentation.
-          commit-message: "docs: update feature documentation"
-          add-paths: src/*/README.md
+          tag: ${{ needs.draft-release.outputs.tag }}
+          publish: "true"
+          github-token: ${{ github.token }}
