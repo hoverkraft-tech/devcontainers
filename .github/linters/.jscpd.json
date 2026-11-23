@@ -1,12 +1,5 @@
 {
 	"threshold": 0,
 	"reporters": ["consoleFull"],
-	"ignore": [
-		"**/node_modules/**",
-		"**/.git/**",
-		"**/.cache/**",
-		".github/logo.svg",
-		".github/workflows/__main-ci.yml",
-		".github/workflows/__pull-request-ci.yml"
-	]
+	"ignore": ["**/node_modules/**", "**/.git/**", "**/.cache/**"]
 }

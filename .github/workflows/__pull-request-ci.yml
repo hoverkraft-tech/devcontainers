@@ -8,13 +8,18 @@ on:
 
 permissions: {}
 
+# Shared CI entry points cancel superseded runs on the same ref.
+# jscpd:ignore-start
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+# jscpd:ignore-end
 
 jobs:
   ci:
     uses: $/.github/workflows/__shared-ci.yml
+    # Shared CI callers need the same permissions.
+    # jscpd:ignore-start
     permissions:
       actions: read
       contents: read
@@ -23,3 +28,4 @@ jobs:
       pull-requests: write
       security-events: write
       statuses: write
+    # jscpd:ignore-end
