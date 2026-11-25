@@ -29,18 +29,18 @@ regeneration leaves it unchanged.
 
 ## Workflow structure
 
-| Entry point                                                                      | Events                                                  | Behavior                                                                  |
-| -------------------------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------- |
-| [`__pull-request-ci.yml`](../../.github/workflows/__pull-request-ci.yml)         | Pull requests targeting `main`, merge groups            | Run shared CI.                                                            |
-| [`__main-ci.yml`](../../.github/workflows/__main-ci.yml)                         | Pushes to `main`, manual runs, weekly schedule          | Run shared CI, including checks for changes in upstream images and tools. |
-| [`semantic-pull-request.yml`](../../.github/workflows/semantic-pull-request.yml) | Pull request creation, reopening, title edits, updates  | Check the title against the repository's commitlint policy.               |
-| [`prepare-release.yml`](../../.github/workflows/prepare-release.yml)             | Pull request creation, reopening, title edits, updates  | Apply the shared release labels. Fork pull requests are skipped.          |
-| [`release.yml`](../../.github/workflows/release.yml)                             | Manual runs and a weekly schedule on the default branch | Plan, validate, draft, publish features, then publish the GitHub release. |
+| Entry point                                                                      | Events                                                  | Behavior                                                                    |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------------- |
+| [`__pull-request-ci.yml`](../../.github/workflows/__pull-request-ci.yml)         | Pull requests targeting `main`, merge groups            | Run shared CI.                                                              |
+| [`__main-ci.yml`](../../.github/workflows/__main-ci.yml)                         | Pushes to `main`, manual runs, weekly schedule          | Run shared CI and update generated feature documentation after main pushes. |
+| [`semantic-pull-request.yml`](../../.github/workflows/semantic-pull-request.yml) | Pull request creation, reopening, title edits, updates  | Check the title against the repository's commitlint policy.                 |
+| [`prepare-release.yml`](../../.github/workflows/prepare-release.yml)             | Pull request creation, reopening, title edits, updates  | Apply the shared release labels. Fork pull requests are skipped.            |
+| [`release.yml`](../../.github/workflows/release.yml)                             | Manual runs and a weekly schedule on the default branch | Plan, validate, draft, publish features, then publish the GitHub release.   |
 
 [`__shared-ci.yml`](../../.github/workflows/__shared-ci.yml) delegates generated
 documentation checks, JavaScript CodeQL analysis, and dependency review to
-`ci-github-nodejs`'s `continuous-integration.yml`. Its build command runs
-`docs:check`; Node.js lint and test jobs are disabled because the shared linter
+`ci-github-nodejs`'s `continuous-integration.yml`. Its build command regenerates documentation on main pushes and runs
+`docs:check` for pull requests, schedules, and releases; Node.js lint and test jobs are disabled because the shared linter
 and container test workflow cover this repository.
 
 The remaining jobs run Hoverkraft's shared linter, CodeQL for Actions, action pin
@@ -55,6 +55,12 @@ when they fail. It collects native lint reports and job outcomes. The
 devcontainer CLI does not produce a structured test report here; inspect its
 job logs for individual assertions. Reports do not replace the producer jobs
 as required checks in branch rules.
+
+After main-push CI succeeds, the documentation job runs the same pinned generator
+and formatter and opens a documentation PR when files changed. The repository
+GitHub App uses `CI_BOT_APP_CLIENT_ID` and `CI_BOT_APP_PRIVATE_KEY` with contents
+and pull request write permissions so that the documentation PR triggers CI.
+Schedules and releases do not publish documentation changes.
 
 CI and releases use `GITHUB_TOKEN`. Feature validation and tests have read-only
 repository access. Fork pull requests run on `pull_request`; shared reporting
