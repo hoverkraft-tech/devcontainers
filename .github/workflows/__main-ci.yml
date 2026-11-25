@@ -26,3 +26,40 @@ jobs:
       pull-requests: write
       security-events: write
       statuses: write
+
+  docs:
+    name: Update feature documentation
+    needs: ci
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: hoverkraft-tech/ci-github-nodejs/actions/setup-node@191d7230d57982bfc11d57f68b005f386a6d7fbf # 3.1.1
+
+      - name: Generate feature documentation
+        run: npm run docs
+
+      - id: token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.CI_BOT_APP_CLIENT_ID }}
+          private-key: ${{ secrets.CI_BOT_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Update generated documentation
+        uses: hoverkraft-tech/ci-github-common/actions/create-and-merge-pull-request@af0bdd6313bd49aaf4a8a7f0de005fb0db856b03 # 4.3.3
+        with:
+          github-token: ${{ steps.token.outputs.token }}
+          add-paths: src/*/README.md
+          branch: docs/feature-documentation
+          title: "docs: update feature documentation"
+          body: Regenerate feature documentation from the feature metadata and notes.
+          commit-message: "docs: update feature documentation"
+          merge-method: squash

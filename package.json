@@ -2,6 +2,7 @@
 	"name": "@hoverkraft-tech/devcontainers",
 	"private": true,
 	"scripts": {
+		"docs": "make docs",
 		"docs:check": "make check-docs"
 	},
 	"engines": {
